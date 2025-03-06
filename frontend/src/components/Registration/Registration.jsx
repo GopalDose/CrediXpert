@@ -39,7 +39,7 @@ function Registration() {
         <div className="form-container">
           <form className="startup-form" onSubmit={handleSubmit}>
             <h2 className="form-title">
-              {isLogin ? "Startup Login" : "Startup Registration"}
+              {isLogin ? "Login" : "Registration"}
             </h2>
 
             {/* TAN and Email side by side */}
