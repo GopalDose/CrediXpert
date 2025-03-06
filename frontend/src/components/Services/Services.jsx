@@ -12,6 +12,9 @@ const Services = () => {
       <h1 className="heading">
         Services
       </h1>
+      <p>
+      Our innovative platform uses artificial intelligence and machine learning to provide comprehensive credit Score for businesses of all sizes.
+      </p>
       <div className="card-container">
         <div className="card">
           <LuBrain className='icon' />

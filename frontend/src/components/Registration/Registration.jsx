@@ -6,6 +6,7 @@ import backgroundImage from "../../assets/images/bg.jpg";
 
 function Registration() {
   const [isLogin, setIsLogin] = useState(false);
+  const [loginType, setLoginType] = useState("user"); // "user" or "bank"
   const [formData, setFormData] = useState({
     tan: "",
     email: "",
@@ -24,7 +25,7 @@ function Registration() {
     e.preventDefault();
     try {
       if (isLogin) {
-        toast.success("Login attempt successful!");
+        toast.success(`Login attempt successful as ${loginType}!`);
       } else {
         toast.success("Registration successful!");
       }
@@ -51,49 +52,128 @@ function Registration() {
               {isLogin ? "Login" : "Registration"}
             </h2>
 
-            {/* TAN and Email side by side */}
-            <div className="form-row">
-              <div className="form-group">
-                <label>TAN</label>
-                <input
-                  type="text"
-                  name="tan"
-                  value={formData.tan}
-                  onChange={handleChange}
-                  placeholder="Enter TAN"
-                  required
-                />
+            {/* Login Type Selection */}
+            {isLogin && (
+              <div className="form-group full-width">
+                <label>Login As</label>
+                <select
+                  name="loginType"
+                  value={loginType}
+                  onChange={(e) => setLoginType(e.target.value)}
+                >
+                  <option value="user">User</option>
+                  <option value="bank">Bank</option>
+                </select>
               </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter email"
-                  required
-                />
-              </div>
-            </div>
+            )}
 
-            {/* Password */}
-            <div className="form-group full-width">
-              <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter password"
-                required
-              />
-            </div>
+            {/* Bank Login Fields */}
+            {isLogin && loginType === "bank" && (
+              <>
+                <div className="form-group full-width">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter email"
+                    required
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter password"
+                    required
+                  />
+                </div>
+              </>
+            )}
 
-            {/* Registration-only fields */}
+            {/* User Login Fields */}
+            {isLogin && loginType === "user" && (
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>TAN</label>
+                    <input
+                      type="text"
+                      name="tan"
+                      value={formData.tan}
+                      onChange={handleChange}
+                      placeholder="Enter TAN"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter email"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-group full-width">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter password"
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Registration Fields (User only) */}
             {!isLogin && (
               <>
-                {/* Company Name and Founder Name side by side */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>TAN</label>
+                    <input
+                      type="text"
+                      name="tan"
+                      value={formData.tan}
+                      onChange={handleChange}
+                      placeholder="Enter TAN"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter email"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-group full-width">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter password"
+                    required
+                  />
+                </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Company Name</label>
@@ -118,8 +198,6 @@ function Registration() {
                     />
                   </div>
                 </div>
-
-                {/* Industry and Founding Year side by side */}
                 <div className="form-row">
                   <div className="form-group">
                     <label>Industry</label>
