@@ -4,6 +4,7 @@ import Header from './components/Header/Header'
 import Hero from './components/Hero/Hero'
 import Service from './components/Services/Services'
 import Registration from './components/Registration/Registration'
+import Footer from './components/Footer/Footer'
 
 const App = () => {
   return (
@@ -12,6 +13,7 @@ const App = () => {
       <Hero /> 
       <Service/>
       <Registration />
+      <Footer />
     </>
   )
 }
