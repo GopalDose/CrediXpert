@@ -1,0 +1,12 @@
+.admin-dashboard{
+    width: 100%;
+    display: flex;
+}
+
+.rightside{
+    width: 100%;
+}
+
+.rightside .data{
+    padding: 10px;
+}

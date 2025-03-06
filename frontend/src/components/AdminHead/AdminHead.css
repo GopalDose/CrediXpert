@@ -1,0 +1,14 @@
+.adminHead{
+    width: 100%;
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: end;
+}
+
+.adminHead .user-icon{
+    font-size: 1.4rem;
+    color: var(--second);
+}
+
+
