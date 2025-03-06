@@ -1,0 +1,33 @@
+footer{
+    background: var(--dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+footer .links{
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    padding: 5px;
+}
+
+footer .links a{
+    color: var(--grey);
+}
+
+footer .copyright{
+    width: 100%;
+    border-top: 1px solid var(--grey);
+    color: var(--grey);
+    text-align: center;
+    padding: 5px;
+}
+
+footer .companyname{
+    color: var(--light);
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 10px;
+}
