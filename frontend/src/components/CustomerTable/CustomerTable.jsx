@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './CustomerTable.css';
 
 const CustomerTable = () => {
@@ -59,6 +59,8 @@ const CustomerTable = () => {
     creditScore: '',
     limit: '',
   });
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   // Apply filters whenever the filters state changes
   useEffect(() => {
@@ -105,6 +107,43 @@ const CustomerTable = () => {
       ...filters,
       [column]: e.target.value,
     });
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Handle dropdown toggle
+  const toggleDropdown = (customerId) => {
+    setActiveDropdown(activeDropdown === customerId ? null : customerId);
+  };
+
+  // Handle view action
+  const handleView = (customer) => {
+    console.log('Viewing customer:', customer);
+    alert(`Viewing details for ${customer.name}`);
+    setActiveDropdown(null);
+  };
+
+  // Handle delete action
+  const handleDelete = (customerId) => {
+    if (window.confirm('Are you sure you want to delete this customer?')) {
+      const updatedCustomers = initialCustomers.filter(c => c.id !== customerId);
+      setCustomers(updatedCustomers);
+      // You would typically make an API call here
+      console.log('Customer deleted:', customerId);
+    }
+    setActiveDropdown(null);
   };
 
   // Format currency
@@ -231,8 +270,31 @@ const CustomerTable = () => {
                 </div>
               </td>
               <td>{formatCurrency(customer.limit)}</td>
-              <td>
-                <button className="action-button">⋯</button>
+              <td className="actions-cell">
+                <div className="dropdown-container" ref={dropdownRef}>
+                  <button 
+                    className="action-button" 
+                    onClick={() => toggleDropdown(customer.id)}
+                  >
+                    ⋯
+                  </button>
+                  {activeDropdown === customer.id && (
+                    <div className="dropdown-menu">
+                      <button 
+                        className="dropdown-item"
+                        onClick={() => handleView(customer)}
+                      >
+                        <span className="dropdown-icon">👁️</span> View
+                      </button>
+                      <button 
+                        className="dropdown-item delete"
+                        onClick={() => handleDelete(customer.id)}
+                      >
+                        <span className="dropdown-icon">🗑️</span> Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
