@@ -10,7 +10,7 @@ header .brand{
     align-items: center;
     gap: .5rem;
     font-size: 1.3rem;
-    color: var(--primary);
+    color: var(--first);
 }
 
 header .brand a{
