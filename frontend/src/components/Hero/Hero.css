@@ -1,4 +1,4 @@
-.hero{
+.hero {
     width: 100%;
     min-height: 90vh;
     display: flex;
@@ -8,6 +8,7 @@
     gap: 2rem;
     padding: 0px 10%;
 }
+
 
 .hero h1.title{
     font-size: 3rem;

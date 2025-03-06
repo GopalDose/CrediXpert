@@ -1,19 +1,19 @@
-import React from 'react'
-import './App.css'
-import Header from './components/Header/Header'
-import Hero from './components/Hero/Hero'
-import Service from './components/Services/Services'
-import Footer from './components/Footer/Footer'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './App.css';
+import Header from './components/Header/Header';
+import Home from './Pages/Home';
+import Registration from './components/Registration/Registration';
 
 const App = () => {
   return (
-    <>
-      <Header />
-      <Hero /> 
-      <Service />
-      <Footer />
-    </>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Registration />} />
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
