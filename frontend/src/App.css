@@ -5,3 +5,18 @@
     color: white;
     font-weight: 400;
 }
+
+.btn-outline{
+    padding: 10px;
+    border-radius: 5px;
+    color: var(--first);
+    border: 2px solid var(--first);
+    font-weight: 400;
+}
+
+span.head{
+    background: var(--light);
+    padding: 5px 30px;
+    border-radius: 50px;
+    color: var(--grey);
+}

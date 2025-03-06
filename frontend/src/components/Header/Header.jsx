@@ -7,7 +7,7 @@ const Header = () => {
         <header className="header">
             <div className="brand">
                 <FaChartLine />
-                <a href="/">CreditAI</a>
+                <a href="/">CrediXpert</a>
             </div>
             <div className="nav-links">
                 <a href="#">Features</a>
