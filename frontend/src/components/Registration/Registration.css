@@ -1,0 +1,148 @@
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--light);
+  padding: 20px; /* Added padding for smaller screens */
+}
+
+.form-container {
+  width: 100%;
+  max-width: 700px; /* Increased slightly to accommodate side-by-side inputs */
+  padding: 20px;
+}
+
+.startup-form {
+  background-color: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-title {
+  text-align: center;
+  color: var(--first);
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1; /* Allows equal width distribution */
+  min-width: 0; /* Prevents overflow */
+}
+
+.form-group.full-width {
+  flex: unset;
+  width: 100%;
+}
+
+.form-group label {
+  color: var(--grey);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box; /* Ensures padding doesn't increase width */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--second);
+  box-shadow: 0 0 5px rgba(0, 94, 255, 0.3);
+}
+
+.form-group select {
+  appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237a7a7a' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right 12px center;
+}
+
+.submit-btn {
+  background-color: var(--first);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background-color: var(--second);
+}
+
+.toggle-text {
+  text-align: center;
+  color: var(--grey);
+  font-size: 14px;
+  margin-top: 15px;
+}
+
+.toggle-link {
+  color: var(--first);
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 5px;
+  text-decoration: none;
+}
+
+.toggle-link:hover {
+  color: var(--second);
+  text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .form-container {
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  .startup-form {
+    padding: 20px;
+  }
+
+  .form-row {
+    flex-direction: column; /* Stack inputs vertically on smaller screens */
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .startup-form {
+    padding: 15px;
+  }
+
+  .form-title {
+    font-size: 20px;
+  }
+
+  .submit-btn {
+    font-size: 14px;
+  }
+}
