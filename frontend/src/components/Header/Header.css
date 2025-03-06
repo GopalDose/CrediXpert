@@ -1,0 +1,29 @@
+header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center ;
+    padding: 20px 120px;
+}
+
+header .brand{
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: 1.3rem;
+    color: var(--primary);
+}
+
+header .brand a{
+    font-weight: bolder;
+    color: black;
+}
+
+header .nav-links{
+    display: flex;
+    gap: 1.3rem;
+}
+
+header .nav-links a{
+    color: var(--grey);
+    font-size: .9rem;
+}

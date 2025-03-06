@@ -1,0 +1,7 @@
+.btn-dark{
+    padding: 10px;
+    background-color: var(--primary);
+    border-radius: 5px;
+    color: white;
+    font-weight: 400;
+}
