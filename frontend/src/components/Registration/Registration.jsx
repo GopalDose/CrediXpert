@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Registration.css";
+import backgroundImage from "../../assets/images/bg.jpg";
 
 function Registration() {
   const [isLogin, setIsLogin] = useState(false);
@@ -35,7 +36,15 @@ function Registration() {
   return (
     <>
       <ToastContainer />
-      <div className="page-container">
+      <div
+        className="page-container"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <div className="form-container">
           <form className="startup-form" onSubmit={handleSubmit}>
             <h2 className="form-title">
