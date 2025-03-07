@@ -1,57 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './CustomerTable.css';
+import axios from 'axios'; // Make sure axios is installed
+import PredictionResultPopup from '../PredictionResultPopup/PredictionResultPopup';
 
-const CustomerTable = () => {
-  // Sample customer data based on the provided image
-  const initialCustomers = [
-    {
-      id: 1,
-      name: 'Rahul Mehta',
-      email: 'rahul@techinnovate.in',
-      business: 'TechInnovate Solutions',
-      riskLevel: 'Low Risk',
-      creditScore: 782,
-      limit: 2500000,
-    },
-    {
-      id: 2,
-      name: 'Priya Singh',
-      email: 'priya@fashionhouse.in',
-      business: 'Fashion House India',
-      riskLevel: 'Medium Risk',
-      creditScore: 675,
-      limit: 1500000,
-    },
-    {
-      id: 3,
-      name: 'Vikram Patel',
-      email: 'vikram@greenfoods.in',
-      business: 'Green Foods Organic',
-      riskLevel: 'Low Risk',
-      creditScore: 802,
-      limit: 3000000,
-    },
-    {
-      id: 4,
-      name: 'Ananya Sharma',
-      email: 'ananya@creativeminds.in',
-      business: 'Creative Minds Studio',
-      riskLevel: 'Medium Risk',
-      creditScore: 620,
-      limit: 1000000,
-    },
-    {
-      id: 5,
-      name: 'Raj Malhotra',
-      email: 'raj@cloudhotels.in',
-      business: 'Cloud Hotels & Resorts',
-      riskLevel: 'High Risk',
-      creditScore: 530,
-      limit: 4000000,
-    },
-  ];
-
-  const [customers, setCustomers] = useState(initialCustomers);
+const CustomerTable = ({ setMidRisk, setLowRisk, setHighRisk }) => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     name: '',
     business: '',
@@ -60,46 +15,121 @@ const CustomerTable = () => {
     limit: '',
   });
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [originalCustomers, setOriginalCustomers] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const dropdownRef = useRef(null);
+
+  // Fetch customers from the API
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoading(true);
+        // Get token from localStorage or wherever you store it
+        const token = localStorage.getItem('token');
+        
+        const response = await axios.get('http://localhost:5000/all_prediction_history', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        // Transform the data to match the table structure
+        const transformedData = response.data.history.map((prediction, index) => {
+          // Extract user details from input_data
+          const businessData = prediction.input_data;
+          
+          // Use joined user data if available, fall back to input_data
+          return {
+            id: prediction.id || index + 1,
+            businessId: prediction.business_id,
+            // Use user data from join if available, otherwise fall back to input data
+            name: prediction.name || businessData.User_Name || `Customer ${index + 1}`,
+            email: prediction.email || businessData.Email || `customer${index + 1}@example.com`,
+            business: prediction.business || businessData.Business_Name || `Business ${prediction.business_id}`,
+            riskLevel: prediction.risk_category,
+            creditScore: Math.round(prediction.credit_score),
+            limit: prediction.predicted_loan,
+            metadata: prediction.metadata,
+            createdAt: prediction.created_at,
+            // Include other relevant fields
+            annualRevenue: businessData.Annual_Revenue,
+            requestedAmount: businessData.Requested_Loan_Amount,
+            gstCompliance: businessData.GST_Compliance,
+            pastDefaults: businessData.Past_Defaults,
+            bankTransactions: businessData.Bank_Transactions,
+            marketTrend: businessData.Market_Trend
+          };
+        });
+        
+        setCustomers(transformedData);
+        setOriginalCustomers(transformedData);
+        setLoading(false);
+        
+        // Update risk counts
+        updateRiskCounts(transformedData);
+      } catch (error) {
+        console.error('Error fetching customers:', error);
+        setError('Failed to fetch customer data. Please try again later.');
+        setLoading(false);
+      }
+    };
+    
+    fetchCustomers();
+  }, []);
+
+  // Update risk counts
+  const updateRiskCounts = (data) => {
+    const lowRiskCount = data.filter(customer => customer.riskLevel === 'Low Risk').length;
+    const mediumRiskCount = data.filter(customer => customer.riskLevel === 'Medium Risk').length;
+    const highRiskCount = data.filter(customer => customer.riskLevel === 'High Risk').length;
+    
+    // Update parent component with counts
+    setLowRisk(lowRiskCount);
+    setMidRisk(mediumRiskCount);
+    setHighRisk(highRiskCount);
+  };
 
   // Apply filters whenever the filters state changes
   useEffect(() => {
-    let filteredData = [...initialCustomers];
+    let filteredData = [...originalCustomers];
 
     // Apply each filter
     if (filters.name) {
       filteredData = filteredData.filter(customer => 
-        customer.name.toLowerCase().includes(filters.name.toLowerCase()) ||
-        customer.email.toLowerCase().includes(filters.name.toLowerCase())
+        (customer.name && customer.name.toLowerCase().includes(filters.name.toLowerCase())) ||
+        (customer.email && customer.email.toLowerCase().includes(filters.name.toLowerCase()))
       );
     }
 
     if (filters.business) {
       filteredData = filteredData.filter(customer => 
-        customer.business.toLowerCase().includes(filters.business.toLowerCase())
+        customer.business && customer.business.toLowerCase().includes(filters.business.toLowerCase())
       );
     }
 
     if (filters.riskLevel) {
       filteredData = filteredData.filter(customer => 
-        customer.riskLevel.toLowerCase().includes(filters.riskLevel.toLowerCase())
+        customer.riskLevel && customer.riskLevel.toLowerCase().includes(filters.riskLevel.toLowerCase())
       );
     }
 
     if (filters.creditScore) {
       filteredData = filteredData.filter(customer => 
-        customer.creditScore.toString().includes(filters.creditScore)
+        customer.creditScore && customer.creditScore.toString().includes(filters.creditScore)
       );
     }
 
     if (filters.limit) {
       filteredData = filteredData.filter(customer => 
-        customer.limit.toString().includes(filters.limit)
+        customer.limit && customer.limit.toString().includes(filters.limit)
       );
     }
 
     setCustomers(filteredData);
-  }, [filters]);
+    // Update risk counts based on filtered data
+    updateRiskCounts(filteredData);
+  }, [filters, originalCustomers]);
 
   // Handle filter changes
   const handleFilterChange = (e, column) => {
@@ -131,17 +161,46 @@ const CustomerTable = () => {
   // Handle view action
   const handleView = (customer) => {
     console.log('Viewing customer:', customer);
-    alert(`Viewing details for ${customer.name}`);
+    
+    // Format the data to match what the popup expects
+    const resultData = {
+      Credit_Score: customer.creditScore,
+      Risk_Category: customer.riskLevel,
+      'Predicted Loan': customer.limit,
+      Requested_Loan_Amount: customer.requestedAmount,
+      metadata: customer.metadata,
+      // Add any other fields needed by the popup
+      Business_ID: customer.businessId,
+      Annual_Revenue: customer.annualRevenue,
+      GST_Compliance: customer.gstCompliance,
+      Past_Defaults: customer.pastDefaults,
+      Bank_Transactions: customer.bankTransactions,
+      Market_Trend: customer.marketTrend,
+    };
+    
+    // Set the selected customer and show the popup
+    setSelectedCustomer(resultData);
+    setShowPopup(true);
     setActiveDropdown(null);
   };
 
   // Handle delete action
-  const handleDelete = (customerId) => {
-    if (window.confirm('Are you sure you want to delete this customer?')) {
-      const updatedCustomers = initialCustomers.filter(c => c.id !== customerId);
-      setCustomers(updatedCustomers);
-      // You would typically make an API call here
-      console.log('Customer deleted:', customerId);
+  const handleDelete = async (customerId) => {
+    if (window.confirm('Are you sure you want to delete this record?')) {
+      try {
+        // Usually you would call an API to delete
+        // await axios.delete(`http://localhost:5000/delete_prediction/${customerId}`);
+        
+        // For now, just update the UI
+        const updatedCustomers = originalCustomers.filter(c => c.id !== customerId);
+        setCustomers(updatedCustomers);
+        setOriginalCustomers(updatedCustomers);
+        updateRiskCounts(updatedCustomers);
+        console.log('Customer record deleted:', customerId);
+      } catch (error) {
+        console.error('Error deleting customer:', error);
+        alert('Failed to delete customer record');
+      }
     }
     setActiveDropdown(null);
   };
@@ -168,6 +227,14 @@ const CustomerTable = () => {
         return 'risk-badge';
     }
   };
+
+  if (loading) {
+    return <div className="loading">Loading customer data...</div>;
+  }
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
     <div className="customer-table-container">
@@ -227,10 +294,10 @@ const CustomerTable = () => {
             </th>
             <th>
               <div className="th-content">
-                <span>Limit</span>
+                <span>Loan Amount</span>
                 <input
                   type="text"
-                  placeholder="Filter limit..."
+                  placeholder="Filter amount..."
                   value={filters.limit}
                   onChange={(e) => handleFilterChange(e, 'limit')}
                   className="filter-input"
@@ -245,61 +312,74 @@ const CustomerTable = () => {
           </tr>
         </thead>
         <tbody>
-          {customers.map((customer) => (
-            <tr key={customer.id}>
-              <td>
-                <div className="customer-name">
-                  <div>{customer.name}</div>
-                  <div className="customer-email">{customer.email}</div>
-                </div>
-              </td>
-              <td>{customer.business}</td>
-              <td>
-                <span className={getRiskBadgeClass(customer.riskLevel)}>
-                  {customer.riskLevel === 'Low Risk' && <span className="icon">✓</span>}
-                  {customer.riskLevel === 'Medium Risk' && <span className="icon">⚠</span>}
-                  {customer.riskLevel === 'High Risk' && <span className="icon">⚫</span>}
-                  {customer.riskLevel}
-                </span>
-              </td>
-              <td>
-                <div className={`credit-score ${customer.creditScore < 600 ? 'low-score' : 
-                  customer.creditScore < 750 ? 'medium-score' : 'high-score'}`}>
-                  {customer.creditScore}
-                  <span className="total-score">/900</span>
-                </div>
-              </td>
-              <td>{formatCurrency(customer.limit)}</td>
-              <td className="actions-cell">
-                <div className="dropdown-container" ref={dropdownRef}>
-                  <button 
-                    className="action-button" 
-                    onClick={() => toggleDropdown(customer.id)}
-                  >
-                    ⋯
-                  </button>
-                  {activeDropdown === customer.id && (
-                    <div className="dropdown-menu">
-                      <button 
-                        className="dropdown-item"
-                        onClick={() => handleView(customer)}
-                      >
-                        <span className="dropdown-icon">👁️</span> View
-                      </button>
-                      <button 
-                        className="dropdown-item delete"
-                        onClick={() => handleDelete(customer.id)}
-                      >
-                        <span className="dropdown-icon">🗑️</span> Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </td>
+          {customers.length === 0 ? (
+            <tr>
+              <td colSpan="6" className="no-data">No customer data available</td>
             </tr>
-          ))}
+          ) : (
+            customers.map((customer) => (
+              <tr key={customer.id}>
+                <td>
+                  <div className="customer-name">
+                    <div>{customer.name}</div>
+                    <div className="customer-email">{customer.email}</div>
+                  </div>
+                </td>
+                <td>{customer.business}</td>
+                <td>
+                  <span className={getRiskBadgeClass(customer.riskLevel)}>
+                    {customer.riskLevel === 'Low Risk' && <span className="icon">✓</span>}
+                    {customer.riskLevel === 'Medium Risk' && <span className="icon">⚠</span>}
+                    {customer.riskLevel === 'High Risk' && <span className="icon">⚫</span>}
+                    {customer.riskLevel}
+                  </span>
+                </td>
+                <td>
+                  <div className={`credit-score ${customer.creditScore < 600 ? 'low-score' : 
+                    customer.creditScore < 750 ? 'medium-score' : 'high-score'}`}>
+                    {customer.creditScore}
+                    <span className="total-score">/900</span>
+                  </div>
+                </td>
+                <td>{formatCurrency(customer.limit)}</td>
+                <td className="actions-cell">
+                  <div className="dropdown-container" ref={activeDropdown === customer.id ? dropdownRef : null}>
+                    <button 
+                      className="action-button" 
+                      onClick={() => toggleDropdown(customer.id)}
+                    >
+                      ⋯
+                    </button>
+                    {activeDropdown === customer.id && (
+                      <div className="dropdown-menu">
+                        <button 
+                          className="dropdown-item"
+                          onClick={() => handleView(customer)}
+                        >
+                          <span className="dropdown-icon">👁️</span> View
+                        </button>
+                        <button 
+                          className="dropdown-item delete"
+                          onClick={() => handleDelete(customer.id)}
+                        >
+                          <span className="dropdown-icon">🗑️</span> Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
+      
+      {/* Prediction Result Popup */}
+      <PredictionResultPopup 
+        isOpen={showPopup}
+        onClose={() => setShowPopup(false)}
+        result={selectedCustomer}
+      />
     </div>
   );
 };

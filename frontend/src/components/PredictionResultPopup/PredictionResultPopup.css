@@ -1,0 +1,296 @@
+.prediction-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .prediction-content {
+    background-color: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  .prediction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .prediction-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+  }
+  
+  .prediction-body {
+    padding: 24px;
+  }
+  
+  .prediction-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .score-section, .risk-section, .loan-section {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  
+  .score-section h3, .risk-section h3, .loan-section h3, .insights-section h3 {
+    font-size: 1.1rem;
+    color: #475569;
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  
+  .score-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .score-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .score-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .score-label {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .score-label span {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #64748b;
+    margin-left: 4px;
+  }
+  
+  .score-category {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+  }
+  
+  .risk-indicator {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .risk-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  
+  .risk-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .risk-category {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .assessment-date {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+  
+  .loan-amount {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .amount-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .amount-label {
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+  
+  .loan-progress {
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background-color: #3b82f6;
+    border-radius: 4px;
+  }
+  
+  .insights-section {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  
+  .points-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .points-category {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .points-category h4 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .positive-header {
+    color: #15803d;
+  }
+  
+  .negative-header {
+    color: #b91c1c;
+  }
+  
+  .neutral-header {
+    color: #0369a1;
+  }
+  
+  .points-items {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  
+  .point-item {
+    position: relative;
+    padding: 6px 0 6px 24px;
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.4;
+  }
+  
+  .point-item:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  
+  .point-item.positive:before {
+    background-color: #4ade80;
+  }
+  
+  .point-item.negative:before {
+    background-color: #f87171;
+  }
+  
+  .point-item.neutral:before {
+    background-color: #60a5fa;
+  }
+  
+  .prediction-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .primary-button, .secondary-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .primary-button {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+  }
+  
+  .secondary-button {
+    background-color: white;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+  }
+  
+  @media (max-width: 768px) {
+    .prediction-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+
+  

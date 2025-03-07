@@ -3,6 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Registration.css";
 import backgroundImage from "../../assets/images/bg.jpg";
+import { useNavigate } from "react-router-dom";
 
 function Registration() {
   const [isLogin, setIsLogin] = useState(false);
@@ -17,6 +18,8 @@ function Registration() {
     foundingYear: "",
   });
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -25,12 +28,65 @@ function Registration() {
     e.preventDefault();
     try {
       if (isLogin) {
-        toast.success(`Login attempt successful as ${loginType}!`);
+        // Handle login
+        const loginEndpoint =
+          loginType === "bank"
+            ? "http://127.0.0.1:5000/bank-login"
+            : "http://127.0.0.1:5000/login";
+
+        const loginData = {
+          email: formData.email,
+          password: formData.password,
+          ...(loginType === "user" && { tan: formData.tan }),
+        };
+
+        const response = await fetch(loginEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(loginData),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          toast.success(`Login successful as ${loginType}!`);
+          localStorage.setItem("token", result.access_token); // Store JWT token
+          setTimeout(() => {
+            navigate("/admin-dashboard");
+          }, 1500);
+        } else {
+          throw new Error(result.error || "Login failed");
+        }
       } else {
-        toast.success("Registration successful!");
+        // Handle registration
+        const response = await fetch("http://127.0.0.1:5000/register", { // Changed to /register
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          toast.success(result.message || "Registration successful!");
+          setFormData({
+            tan: "",
+            email: "",
+            password: "",
+            companyName: "",
+            founderName: "",
+            industry: "",
+            foundingYear: "",
+          });
+          setIsLogin(true)
+        } else {
+          throw new Error(result.error || "Registration failed");
+        }
       }
     } catch (error) {
-      toast.error("An error occurred!");
+      toast.error(`An error occurred: ${error.message}`);
     }
   };
 
@@ -48,9 +104,7 @@ function Registration() {
       >
         <div className="form-container">
           <form className="startup-form" onSubmit={handleSubmit}>
-            <h2 className="form-title">
-              {isLogin ? "Login" : "Registration"}
-            </h2>
+            <h2 className="form-title">{isLogin ? "Login" : "Registration"}</h2>
 
             {/* Login Type Selection */}
             {isLogin && (
