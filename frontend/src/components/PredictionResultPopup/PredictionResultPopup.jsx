@@ -62,15 +62,219 @@ const PredictionResultPopup = ({ isOpen, onClose, result }) => {
 
         return { color, label };
     };
-    console.log(result);
     
     const scoreInfo = getCreditScoreInfo(result.Credit_Score);
     const riskColor = getRiskColor(result.Risk_Category);
-    const loanAmount = result.limit || 0;
+    const loanAmount = result.Predicted_Loan || 0;
     const requestedAmount = result.Requested_Loan_Amount || 0;
     const approvalPercentage = requestedAmount > 0
         ? Math.round((loanAmount / requestedAmount) * 100)
         : 0;
+
+    // Function to generate and download HTML report
+    const handleDownloadReport = () => {
+        // Create a new HTML document for the report
+        const reportWindow = window.open('', '_blank');
+        
+        // Get current date for the report
+        const currentDate = new Date().toLocaleDateString();
+        
+        // Apply styling
+        const style = `
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    border-bottom: 1px solid #ddd;
+                    padding-bottom: 20px;
+                }
+                .section {
+                    margin-bottom: 30px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                th, td {
+                    padding: 12px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
+                .risk-low {
+                    color: #4ade80;
+                    font-weight: bold;
+                }
+                .risk-medium {
+                    color: #facc15;
+                    font-weight: bold;
+                }
+                .risk-high {
+                    color: #f87171;
+                    font-weight: bold;
+                }
+                .footer {
+                    margin-top: 50px;
+                    text-align: center;
+                    font-size: 0.8em;
+                    color: #888;
+                    border-top: 1px solid #ddd;
+                    padding-top: 20px;
+                }
+                .print-button {
+                    display: block;
+                    margin: 20px auto;
+                    padding: 10px 20px;
+                    background-color: #4b5563;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                @media print {
+                    .print-button {
+                        display: none;
+                    }
+                }
+            </style>
+        `;
+        
+        // Get risk class
+        let riskClass = '';
+        if (result.Risk_Category.includes('Low')) {
+            riskClass = 'risk-low';
+        } else if (result.Risk_Category.includes('Medium')) {
+            riskClass = 'risk-medium';
+        } else if (result.Risk_Category.includes('High')) {
+            riskClass = 'risk-high';
+        }
+        
+        // Create insights HTML
+        let insightsHTML = '';
+        if (metadata && metadata.length > 0) {
+            insightsHTML = `
+                <ul style="padding-left: 20px;">
+                    ${metadata.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+        } else {
+            insightsHTML = `<p>No specific insights available for this assessment.</p>`;
+        }
+
+        // Create HTML content for the report
+        const reportContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Loan Assessment Report</title>
+                ${style}
+            </head>
+            <body>
+                <button class="print-button" onclick="window.print()">Print Report</button>
+                
+                <div class="header">
+                    <h1>Loan Assessment Report</h1>
+                    <p>Date: ${currentDate}</p>
+                    <p>Business ID: ${result.Business_ID || 'N/A'}</p>
+                </div>
+                
+                <div class="section">
+                    <h2>Credit Score Assessment</h2>
+                    <table>
+                        <tr>
+                            <th>Credit Score</th>
+                            <td>${result.Credit_Score}/900</td>
+                        </tr>
+                        <tr>
+                            <th>Rating</th>
+                            <td>${scoreInfo.label}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2>Risk Assessment</h2>
+                    <table>
+                        <tr>
+                            <th>Risk Category</th>
+                            <td class="${riskClass}">${result.Risk_Category}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2>Loan Details</h2>
+                    <table>
+                        <tr>
+                            <th>Approved Loan Amount</th>
+                            <td>${formatCurrency(loanAmount)}</td>
+                        </tr>
+                        <tr>
+                            <th>Requested Loan Amount</th>
+                            <td>${formatCurrency(requestedAmount)}</td>
+                        </tr>
+                        <tr>
+                            <th>Approval Percentage</th>
+                            <td>${approvalPercentage}%</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2>Business Metrics</h2>
+                    <table>
+                        <tr>
+                            <th>Annual Revenue</th>
+                            <td>${formatCurrency(result.Annual_Revenue || 0)}</td>
+                        </tr>
+                        <tr>
+                            <th>GST Compliance</th>
+                            <td>${result.GST_Compliance || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Past Defaults</th>
+                            <td>${result.Past_Defaults || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Bank Transactions</th>
+                            <td>${result.Bank_Transactions || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Market Trend</th>
+                            <td>${result.Market_Trend || 'N/A'}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2>Risk Insights</h2>
+                    ${insightsHTML}
+                </div>
+                
+                <div class="footer">
+                    <p>This report is generated automatically and is strictly confidential.</p>
+                    <p>For any queries, please contact the finance department.</p>
+                </div>
+            </body>
+            </html>
+        `;
+        
+        // Write the HTML content to the new window
+        reportWindow.document.open();
+        reportWindow.document.write(reportContent);
+        reportWindow.document.close();
+    };
 
     return (
         <div className="prediction-overlay">
@@ -141,7 +345,6 @@ const PredictionResultPopup = ({ isOpen, onClose, result }) => {
                                         <p key={index}>{val}</p>
                                     ))}
                                 </>
-
                             ) : (
                                 <div className="points-category">
                                     <h4 className="neutral-header">Assessment Notes</h4>
@@ -156,7 +359,7 @@ const PredictionResultPopup = ({ isOpen, onClose, result }) => {
 
                 <div className="prediction-footer">
                     <button className="primary-button" onClick={onClose}>Close</button>
-                    <button className="secondary-button">Download Report</button>
+                    <button className="secondary-button" onClick={handleDownloadReport}>Download Report</button>
                 </div>
             </div>
         </div>

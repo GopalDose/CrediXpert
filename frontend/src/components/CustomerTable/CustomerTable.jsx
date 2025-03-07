@@ -168,7 +168,8 @@ const CustomerTable = ({ setMidRisk, setLowRisk, setHighRisk }) => {
       Credit_Score: customer.creditScore,
       Risk_Category: customer.riskLevel,
       Predicted_Loan: customer.limit,
-      Requested_Loan_Amount: customer.requestedAmount,
+      Requested_Loan_Amount: customer.requestedAmount
+      ,
       metadata: customer.metadata,
       // Add any other fields needed by the popup
       Business_ID: customer.businessId,

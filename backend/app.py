@@ -150,7 +150,9 @@ def create_tables():
                     company_name VARCHAR(255) NOT NULL,
                     founder_name VARCHAR(255) NOT NULL,
                     industry VARCHAR(255) NOT NULL,
-                    founding_year INT NOT NULL
+                    founding_year INT NOT NULL,
+                    cibil JSON DEFAULT NULL
+
                 )
             """)
             
@@ -196,13 +198,37 @@ def save_prediction(business_id, input_data, credit_score, risk_category, predic
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
-            # First try to find a user with matching TAN number
-            if user_id is None and 'TAN' in input_data:
-                cursor.execute("SELECT id FROM users WHERE tan = %s", (input_data['TAN'],))
+            # Since business_id and TAN are the same, we can use business_id directly
+            if user_id is None:
+                cursor.execute("SELECT id, cibil FROM users WHERE tan = %s", (business_id,))
                 user_result = cursor.fetchone()
                 if user_result:
                     user_id = user_result['id']
-            print("predicted_loan "+predicted_loan)
+                    
+                    # Get current CIBIL data or initialize empty array
+                    current_cibil = json.loads(user_result['cibil']) if user_result['cibil'] else []
+                    
+                    # If current_cibil is not a list (might be a single value from before), convert to list
+                    if not isinstance(current_cibil, list):
+                        current_cibil = [current_cibil]
+                    
+                    # Add new credit score with timestamp
+                    new_score = {
+                        "score": float(credit_score),
+                        "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                    current_cibil.append(new_score)
+                    
+                    # Update the CIBIL column
+                    cursor.execute(
+                        "UPDATE users SET cibil = %s WHERE id = %s",
+                        (json.dumps(current_cibil), user_id)
+                    )
+            
+            # Convert predicted_loan to string for logging
+            print("predicted_loan " + str(predicted_loan))
+            
+            # Insert into prediction history
             cursor.execute("""
                 INSERT INTO prediction_history 
                 (business_id, input_data, credit_score, risk_category, predicted_loan, metadata, user_id)
@@ -220,6 +246,7 @@ def save_prediction(business_id, input_data, credit_score, risk_category, predic
         return True
     except Exception as e:
         print(f"Error saving prediction data: {str(e)}")
+        print(traceback.format_exc())
         return False
     finally:
         connection.close()
@@ -476,6 +503,106 @@ def login():
             access_token = create_access_token(identity=user['id'])
             return jsonify({"access_token": access_token}), 200
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        connection.close()
+
+@app.route("/user_profile/<tan>", methods=["GET"])
+@jwt_required()
+def get_user_profile(tan):
+    # Verify the current user's identity (optional security measure)
+    current_user_id = get_jwt_identity()
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            # First get the user information
+            cursor.execute("""
+                SELECT id, tan, email, company_name, founder_name, industry, founding_year, cibil
+                FROM users 
+                WHERE tan = %s
+            """, (tan,))
+            
+            user = cursor.fetchone()
+            if not user:
+                return jsonify({"error": "User not found"}), 404
+                
+            # Parse the CIBIL history if it exists
+            if user['cibil']:
+                user['cibil'] = json.loads(user['cibil'])
+            else:
+                user['cibil'] = []
+                
+            # Get the user's prediction history
+            cursor.execute("""
+                SELECT id, input_data, credit_score, risk_category, predicted_loan, metadata, created_at
+                FROM prediction_history
+                WHERE business_id = %s
+                ORDER BY created_at DESC
+            """, (tan,))
+            
+            history = cursor.fetchall()
+            
+            # Process the prediction history
+            processed_history = []
+            for record in history:
+                # Convert datetime to string
+                record['created_at'] = record['created_at'].strftime('%Y-%m-%d %H:%M:%S')
+                
+                # Parse JSON fields
+                if record['input_data']:
+                    record['input_data'] = json.loads(record['input_data'])
+                if record['metadata']:
+                    record['metadata'] = json.loads(record['metadata'])
+                    
+                processed_history.append(record)
+            
+            # Calculate additional metrics if there's history
+            metrics = {}
+            if processed_history:
+                # Get the latest credit score
+                latest_score = processed_history[0]['credit_score']
+                metrics['latest_credit_score'] = latest_score
+                
+                # Get the latest risk category
+                metrics['latest_risk_category'] = processed_history[0]['risk_category']
+                
+                # Get the latest loan eligibility
+                metrics['latest_loan_eligibility'] = processed_history[0]['predicted_loan']
+                
+                # Calculate score change if there's more than one record
+                if len(processed_history) > 1:
+                    previous_score = processed_history[1]['credit_score']
+                    metrics['score_change'] = latest_score - previous_score
+                else:
+                    metrics['score_change'] = 0
+                
+                # Calculate next review date (example: 30 days from last prediction)
+                last_prediction_date = datetime.strptime(processed_history[0]['created_at'], '%Y-%m-%d %H:%M:%S')
+                next_review = (datetime.now() - last_prediction_date).days
+                metrics['days_since_last_review'] = next_review
+                metrics['days_until_next_review'] = max(0, 30 - next_review)
+            
+            # Construct the response
+            response = {
+                "user": {
+                    "tan": user['tan'],
+                    "email": user['email'],
+                    "company_name": user['company_name'],
+                    "founder_name": user['founder_name'],
+                    "industry": user['industry'],
+                    "founding_year": user['founding_year']
+                },
+                "credit_history": user['cibil'],
+                "prediction_history": processed_history,
+                "metrics": metrics
+            }
+            
+            return jsonify(response)
+            
+    except Exception as e:
+        print(f"Error fetching user profile: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
     finally:
         connection.close()
