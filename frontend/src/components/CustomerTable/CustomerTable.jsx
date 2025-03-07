@@ -38,6 +38,7 @@ const CustomerTable = ({ setMidRisk, setLowRisk, setHighRisk }) => {
         const transformedData = response.data.history.map((prediction, index) => {
           // Extract user details from input_data
           const businessData = prediction.input_data;
+          console.log("prediction " +prediction);
           
           // Use joined user data if available, fall back to input_data
           return {
@@ -166,7 +167,7 @@ const CustomerTable = ({ setMidRisk, setLowRisk, setHighRisk }) => {
     const resultData = {
       Credit_Score: customer.creditScore,
       Risk_Category: customer.riskLevel,
-      'Predicted Loan': customer.limit,
+      Predicted_Loan: customer.limit,
       Requested_Loan_Amount: customer.requestedAmount,
       metadata: customer.metadata,
       // Add any other fields needed by the popup
@@ -177,6 +178,7 @@ const CustomerTable = ({ setMidRisk, setLowRisk, setHighRisk }) => {
       Bank_Transactions: customer.bankTransactions,
       Market_Trend: customer.marketTrend,
     };
+    console.log(resultData);
     
     // Set the selected customer and show the popup
     setSelectedCustomer(resultData);

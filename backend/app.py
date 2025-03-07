@@ -202,7 +202,7 @@ def save_prediction(business_id, input_data, credit_score, risk_category, predic
                 user_result = cursor.fetchone()
                 if user_result:
                     user_id = user_result['id']
-            
+            print("predicted_loan "+predicted_loan)
             cursor.execute("""
                 INSERT INTO prediction_history 
                 (business_id, input_data, credit_score, risk_category, predicted_loan, metadata, user_id)
@@ -319,7 +319,7 @@ def predict():
         
         # Get analysis from Gemini
         metadata = chat(df_input.to_json())
-        
+        print(final_loan)
         # Save prediction data to database
         if business_id:
             save_prediction(
@@ -405,6 +405,7 @@ def get_all_prediction_history():
                             record['email'] = user['email']
                             record['name'] = user['founder_name']
                             record['business'] = user['company_name']
+                            record['predicted_loan'] = user['predicted_loan']
                     
                     # If still missing, use values from input_data if available
                     if record['name'] is None and 'User_Name' in input_data:

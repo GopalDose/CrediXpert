@@ -62,10 +62,11 @@ const PredictionResultPopup = ({ isOpen, onClose, result }) => {
 
         return { color, label };
     };
-
+    console.log(result);
+    
     const scoreInfo = getCreditScoreInfo(result.Credit_Score);
     const riskColor = getRiskColor(result.Risk_Category);
-    const loanAmount = result['Predicted Loan'] || 0;
+    const loanAmount = result.limit || 0;
     const requestedAmount = result.Requested_Loan_Amount || 0;
     const approvalPercentage = requestedAmount > 0
         ? Math.round((loanAmount / requestedAmount) * 100)
