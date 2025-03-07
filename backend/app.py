@@ -374,6 +374,29 @@ def get_prediction_history(business_id):
     finally:
         connection.close()
 
+@app.route("/prediction_history/<history_id>", methods=["DELETE"])
+# @jwt_required()
+def delete_prediction_history(history_id):
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                DELETE FROM prediction_history
+                WHERE id = %s
+                RETURNING id
+            """, (history_id,))
+            deleted_record = cursor.fetchone()
+            
+            if deleted_record:
+                connection.commit()
+                return jsonify({"message": "Prediction history record deleted successfully"}), 200
+            else:
+                return jsonify({"error": "Record not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        connection.close()
+
 @app.route("/all_prediction_history", methods=["GET"])
 def get_all_prediction_history():
     connection = get_db_connection()
@@ -487,7 +510,59 @@ def protected():
     current_user_id = get_jwt_identity()
     return jsonify({"message": f"Hello, user {current_user_id}!"}), 200
 
+
+# chatbot 
+@app.route('/chat',methods=['POST'])
+def chat():
+    try:
+        prompt = request.data.get("prompt")
+        if not prompt:
+            return jsonify({"error": "Prompt is required"}, status=400)
+
+        headers = {"Content-Type": "application/json"}
+        data = {
+            "contents": [{"parts": [{"text": prompt + " in a concise manner in 3 to 4 lines and simple for understanding"}]}]
+        }
+
+        response = requests.post(GEMINI_URL, headers=headers, json=data)
+
+        response_data = response.json()
+        
+        print("Gemini API Response:", response_data)  # ✅ Debugging
+
+        # ✅ Ensure response_data contains 'candidates' instead of 'contents'
+        if "candidates" in response_data and len(response_data["candidates"]) > 0:
+            candidate = response_data["candidates"][0]
+
+            if "content" in candidate and "parts" in candidate["content"] and len(candidate["content"]["parts"]) > 0:
+                response_text = candidate["content"]["parts"][0]["text"]
+                return jsonify({"response": response_text}, status=200)
+
+        return jsonify({"error": "Invalid API response structure"}, status=500)
+
+    except Exception as e:
+        print("Exception:", str(e))  # ✅ Print error message
+        print(traceback.format_exc())  # ✅ Print full error traceback
+        return jsonify({"error": str(e)}, status=500)
+    
 # Run the Flask app
 if __name__ == '__main__':
     create_tables()
     app.run(debug=True)
+
+# react frontend function
+# import axios from "axios";
+
+# const API_URL = "YOUR_BACKEND_API_URL/chat"; // Replace with actual backend URL
+
+# export const fetchChatbotResponse = async (prompt) => {
+
+    # prompt = prompt +  ithe context de mhnje keypoints concat karun
+#   try {
+#     const response = await axios.post(API_URL, { prompt });
+#     return response.data.response; // Assuming backend returns { response: "text" }
+#   } catch (error) {
+#     console.error("Error fetching chatbot response:", error);
+#     return "Error fetching response. Please try again.";
+#   }
+# };
