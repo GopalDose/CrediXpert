@@ -191,10 +191,8 @@ const CustomerTable = ({ setMidRisk, setLowRisk, setHighRisk }) => {
   const handleDelete = async (customerId) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
       try {
-        // Usually you would call an API to delete
-        // await axios.delete(`http://localhost:5000/delete_prediction/${customerId}`);
-        
-        // For now, just update the UI
+        const response = await axios.delete(`http://localhost:5000/all_prediction_history/${historyId}`);
+         
         const updatedCustomers = originalCustomers.filter(c => c.id !== customerId);
         setCustomers(updatedCustomers);
         setOriginalCustomers(updatedCustomers);
